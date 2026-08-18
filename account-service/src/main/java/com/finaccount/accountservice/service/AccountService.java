@@ -4,8 +4,6 @@ import com.finaccount.accountservice.dto.AccountStatus;
 import com.finaccount.accountservice.dto.AccountDto;
 import com.finaccount.accountservice.jpa.AccountEntity;
 import com.finaccount.accountservice.jpa.AccountRepository;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,10 +25,8 @@ public class AccountService implements UserDetailsService {
     }
 
     public AccountDto createAccount(AccountDto dto) {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        AccountEntity entity = mapper.map(dto, AccountEntity.class);
+        AccountEntity entity = new AccountEntity();
+        entity.setOwnerName(dto.getOwnerName());
         entity.setAccountNumber(new AccountNumberGenerator().generate());
         entity.setBalance(0L);
         entity.setStatus(AccountStatus.ACTIVE);
@@ -38,25 +34,17 @@ public class AccountService implements UserDetailsService {
 
         entity = repository.save(entity);
 
-        AccountDto created = mapper.map(entity, AccountDto.class);
-
-        return created;
+        return entityToDto(entity);
     }
 
     public AccountDto getAccountByAccountId(Integer accountId) throws NoSuchElementException {
         AccountEntity entity = repository.findById(accountId).orElseThrow();
-
-        AccountDto dto = new ModelMapper().map(entity, AccountDto.class);
-
-        return dto;
+        return entityToDto(entity);
     }
 
     public AccountDto getAccountByAccountNumber(String accountNumber) throws NoSuchElementException {
         AccountEntity entity = repository.findByAccountNumber(accountNumber).orElseThrow();
-
-        AccountDto dto = new ModelMapper().map(entity, AccountDto.class);
-
-        return dto;
+        return entityToDto(entity);
     }
 
     @Override
@@ -91,10 +79,7 @@ public class AccountService implements UserDetailsService {
         }
 
         AccountEntity saved = repository.save(entity);
-
-        AccountDto account = new ModelMapper().map(saved, AccountDto.class);
-
-        return account;
+        return entityToDto(saved);
     }
 
     private boolean isBalanceToBeUpdated(AccountDto dto) {
@@ -103,5 +88,16 @@ public class AccountService implements UserDetailsService {
 
     private boolean isStatusToBeUpdated(AccountDto dto) {
         return dto.getStatus() != null;
+    }
+
+    private AccountDto entityToDto(AccountEntity entity) {
+        AccountDto dto = new AccountDto();
+        dto.setAccountId(entity.getAccountId());
+        dto.setAccountNumber(entity.getAccountNumber());
+        dto.setOwnerName(entity.getOwnerName());
+        dto.setPassword(entity.getPassword());
+        dto.setBalance(entity.getBalance());
+        dto.setStatus(entity.getStatus());
+        return dto;
     }
 }
