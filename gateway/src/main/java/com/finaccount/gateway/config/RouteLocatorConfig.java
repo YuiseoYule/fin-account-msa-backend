@@ -10,15 +10,6 @@ public class RouteLocatorConfig {
     @Bean
     public RouteLocator getRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("account-service-login", route -> route
-                        .path("/auth/login/**")
-                        .filters(filter -> filter
-                                .rewritePath(
-                                        "/auth/(?<segment>.*)",
-                                        "/${segment}"
-                                ))
-                        .uri("lb://ACCOUNT-SERVICE")
-                )
                 .route("account-service-h2console", route -> route
                         .path("/account-service/h2-console/**")
                         .filters(filter -> filter
@@ -28,16 +19,52 @@ public class RouteLocatorConfig {
                                 ))
                         .uri("lb://ACCOUNT-SERVICE")
                 )
-                .route("account-service", route -> route
-                        .path("/accounts/**")
-                        .filters(filter -> filter)
-                        .uri("lb://ACCOUNT-SERVICE")
-                )
                 .route("transaction-service-h2console", route -> route
                         .path("/transaction-service/h2-console/**")
                         .filters(filter -> filter
                                 .rewritePath(
                                         "/transaction-service/(?<segment>.*)",
+                                        "/${segment}"
+                                ))
+                        .uri("lb://TRANSACTION-SERVICE")
+                )
+                .route("api-account-service-login", route -> route
+                        .path("/api/auth/login/**", "/api/auth/login")
+                        .filters(filter -> filter
+                                .rewritePath(
+                                        "/api/auth/(?<segment>.*)",
+                                        "/${segment}"
+                                ))
+                        .uri("lb://ACCOUNT-SERVICE")
+                )
+                .route("account-service-login", route -> route
+                        .path("/auth/login/**", "/auth/login")
+                        .filters(filter -> filter
+                                .rewritePath(
+                                        "/auth/(?<segment>.*)",
+                                        "/${segment}"
+                                ))
+                        .uri("lb://ACCOUNT-SERVICE")
+                )
+                .route("api-account-service", route -> route
+                        .path("/api/accounts/**")
+                        .filters(filter -> filter
+                                .rewritePath(
+                                        "/api/(?<segment>.*)",
+                                        "/${segment}"
+                                ))
+                        .uri("lb://ACCOUNT-SERVICE")
+                )
+                .route("account-service", route -> route
+                        .path("/accounts/**")
+                        .filters(filter -> filter)
+                        .uri("lb://ACCOUNT-SERVICE")
+                )
+                .route("api-transaction-service", route -> route
+                        .path("/api/transactions/**")
+                        .filters(filter -> filter
+                                .rewritePath(
+                                        "/api/(?<segment>.*)",
                                         "/${segment}"
                                 ))
                         .uri("lb://TRANSACTION-SERVICE")
